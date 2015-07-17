@@ -1,0 +1,9 @@
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\bin\Debug\TestChatSharp.exe.config
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\bin\Debug\TestChatSharp.exe
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\bin\Debug\TestChatSharp.pdb
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\bin\Debug\ChatSharp.dll
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\bin\Debug\ChatSharp.pdb
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\obj\x86\Debug\TestChatSharp.csprojResolveAssemblyReference.cache
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\obj\x86\Debug\TestChatSharp.exe
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\obj\x86\Debug\TestChatSharp.pdb
+C:\Users\Blank\Documents\GitHub\ChatSharp\TestChatSharp\bin\Debug\RetaBot.exe.config

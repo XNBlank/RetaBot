@@ -1,0 +1,4 @@
+C:\Users\Blank\Documents\GitHub\ChatSharp\ChatSharp\bin\Debug\ChatSharp.dll
+C:\Users\Blank\Documents\GitHub\ChatSharp\ChatSharp\bin\Debug\ChatSharp.pdb
+C:\Users\Blank\Documents\GitHub\ChatSharp\ChatSharp\obj\Debug\ChatSharp.dll
+C:\Users\Blank\Documents\GitHub\ChatSharp\ChatSharp\obj\Debug\ChatSharp.pdb
