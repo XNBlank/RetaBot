@@ -21,6 +21,8 @@ namespace RetaBot
         private static string message;
         public static int ttlquestions;
         private static List<string> floodlist = new List<string>();
+        public static bool triviaToggle;
+        public static int triviatimer;
 
         private static string[] feeling = new string[] {
 			"I am doing well",
@@ -137,46 +139,95 @@ namespace RetaBot
                         char commandpre = ProgramSettings.settings.Prefix;
                         client.SendRawMessage("PRIVMSG {0} :Hi! I'm a bot! The current prefix is {1}. You can get a list of my commands with {1}commands!", client.Channels[0].Name, commandpre);
                     }
-                    if (e.PrivateMessage.Message.Contains("Hello") || e.PrivateMessage.Message.Contains("Hi") || e.PrivateMessage.Message.Contains("Hey"))
+                    if (e.PrivateMessage.Message.Contains("Hello".ToLower()) || e.PrivateMessage.Message.Contains("Hi".ToLower()) || e.PrivateMessage.Message.Contains("Hey".ToLower()) || e.PrivateMessage.Message.Contains("Howdy".ToLower()) || e.PrivateMessage.Message.Contains("Hola".ToLower()) || e.PrivateMessage.Message.Contains("Bonjour".ToLower()))
                     {
                         
                         client.SendRawMessage("PRIVMSG {0} :Hello there!", client.Channels[0].Name);
                     }
-                    if (e.PrivateMessage.Message.Contains("what time"))
+                    if (e.PrivateMessage.Message.Contains("time"))
                     {
                         string time = DateTime.Now.ToString("h:mm:ss tt");
                         client.SendRawMessage("PRIVMSG {0} :The time is currently {1} UTC-8 (PST).", client.Channels[0].Name, time);
                     }
-                    if (e.PrivateMessage.Message.Contains("how are you"))
+                    if (e.PrivateMessage.Message.Contains("how") && e.PrivateMessage.Message.Contains("are") || e.PrivateMessage.Message.Contains("you"))
                     {
                         int feels = random.Next(0,6);
                         string imfeeling = feeling[feels];
                         client.SendRawMessage("PRIVMSG {0} :{1}.", client.Channels[0].Name, imfeeling);
                     }
 
-                }
-                else
-                {
-                    if (e.PrivateMessage.Message.Contains("http://") && !e.PrivateMessage.Message.Contains("dnp"))
+
+                    if (e.PrivateMessage.Message.Contains("hug") || e.PrivateMessage.Message.Contains("hugs"))
                     {
+                        client.SendRawMessage("PRIVMSG {0} :" + "\x01" + "ACTION hugs {1} back.\x01", client.Channels[0].Name, e.PrivateMessage.User.Nick);
+                    }
+
+                    if (e.PrivateMessage.Message.Contains("kiss") || e.PrivateMessage.Message.Contains("kisses") || e.PrivateMessage.Message.Contains("makes out"))
+                    {
+                        client.SendRawMessage("PRIVMSG {0} :" + "\x01" + "ACTION pushes {1} away.\x01", client.Channels[0].Name, e.PrivateMessage.User.Nick);
+                        client.SendRawMessage("PRIVMSG {0} :Uhm...no kissing me, {1}.", client.Channels[0].Name, e.PrivateMessage.User.Nick);
+                    }
+                    if (e.PrivateMessage.Message.Contains("sex") || e.PrivateMessage.Message.Contains("fuck") || e.PrivateMessage.Message.Contains("fucks") || e.PrivateMessage.Message.Contains("humps") || e.PrivateMessage.Message.Contains("rapes") || e.PrivateMessage.Message.Contains("inappropriate") && e.PrivateMessage.Message.Contains("place") || e.PrivateMessage.Message.Contains("places"))
+                    {
+                        client.SendRawMessage("PRIVMSG {0} :" + "\x01" + "ACTION punches {1}.\x01", client.Channels[0].Name, e.PrivateMessage.User.Nick);
+                        client.SendRawMessage("PRIVMSG {0} :DON'T TOUCH ME, {1}!", client.Channels[0].Name, e.PrivateMessage.User.Nick.ToUpper());
                         try
                         {
-                            WebClient x = new WebClient();
-                            client.SendRawMessage("PRIVMSG {0} :Grabbing link title...", client.Channels[0].Name);
-                            string url = e.PrivateMessage.Message.Substring(e.PrivateMessage.Message.LastIndexOf("http://"));
-                            string[] cleaned = url.Split(new char[] { ' ' }, 2);
-                            string source = x.DownloadString(cleaned[0]);
-                            string title = Regex.Match(source, @"\<title\b[^>]*\>\s*(?<Title>[\s\S]*?)\</title\>", RegexOptions.IgnoreCase).Groups["Title"].Value;
-                            client.SendRawMessage("PRIVMSG {0} :{3} submitted a link : [ {1} ] - {2}.", client.Channels[0].Name, title, cleaned[0], e.PrivateMessage.User.Nick);
+                            client.SendRawMessage("PRIVMSG CHANSERV :op");
+                            try
+                            {
+                                client.KickUser(client.Channels[0].Name, e.PrivateMessage.User.Nick, "EXPLOIT!");
+                            }
+                            catch
+                            {
+                                client.SendRawMessage("PRIVMSG {0} :IF ONLY I COULD KICK YOU...!", client.Channels[0].Name);
+                            }
+                            client.SendRawMessage("PRIVMSG CHANSERV :deop");
                         }
                         catch
                         {
-                            //Do nothing.
+                            client.SendRawMessage("PRIVMSG {0} :I NEED AN ADMIN!", client.Channels[0].Name);
                         }
                     }
 
+                    if (e.PrivateMessage.Message.Contains("joke"))
+                    {
+                        Jokes.Joke();
+                        client.SendRawMessage("PRIVMSG {0} :{1}", client.Channels[0].Name, Jokes.thisjoke);
+                        Console.WriteLine("The joke was " + Jokes.randJoke);
+                    }
 
                 }
+                else
+                {
+                    if (e.PrivateMessage.Message.Contains("http://") || e.PrivateMessage.Message.Contains("https://") || e.PrivateMessage.Message.Contains("www.") || e.PrivateMessage.Message.Contains(".com") || e.PrivateMessage.Message.Contains(".net") || e.PrivateMessage.Message.Contains(".org") || e.PrivateMessage.Message.Contains(".ca") || e.PrivateMessage.Message.Contains(".us") || e.PrivateMessage.Message.Contains(".io") || e.PrivateMessage.Message.Contains(".mx") && !e.PrivateMessage.Message.Contains("dnp"))
+                    {
+                        
+                            try
+                            {
+                                string privatemessage = e.PrivateMessage.Message;
+                                WebClient x = new WebClient();
+                                client.SendRawMessage("NOTICE {0} :{0} Hold on, grabbing link title...", e.PrivateMessage.User.Nick);
+                                string url = e.PrivateMessage.Message.Substring(e.PrivateMessage.Message.LastIndexOf("http://"));
+                                string[] cleaned = url.Split(new char[] { ' ' }, 2);
+                                if (e.PrivateMessage.Message.Contains(".xxx") || e.PrivateMessage.Message.Contains("porn"))
+                                {
+                                    client.SendRawMessage("PRIVMSG {0} :Thanks for posting porn here, {1}", client.Channels[0].Name, e.PrivateMessage.User.Nick);
+                                    return;
+                                }
+                                string source = x.DownloadString(cleaned[0]);
+                                string title = Regex.Match(source, @"\<title\b[^>]*\>\s*(?<Title>[\s\S]*?)\</title\>", RegexOptions.IgnoreCase).Groups["Title"].Value;
+                                client.SendRawMessage("PRIVMSG {0} :{3} submitted a link : [ {1} ] - {2}.", client.Channels[0].Name, title, cleaned[0], e.PrivateMessage.User.Nick);
+                            }
+                            catch
+                            {
+                                //Do nothing.
+                            }
+                    }
+                    
+
+                    }
+
             };
 
             while (true)
@@ -254,17 +305,32 @@ namespace RetaBot
             {
                 client.SendRawMessage("PRIVMSG {0} :Hi {1}! I'm sending you a list of my commands!", client.Channels[0].Name, sender.Nick);
                 client.SendRawMessage("PRIVMSG {0} :Here is a list of my commands!", sender.Nick);
-                client.SendRawMessage("PRIVMSG {0} :quit, help, commands, dice, d, slap", sender.Nick);
+                client.SendRawMessage("PRIVMSG {0} :quit, help, info, commands, roll, slap, trivia", sender.Nick);
                 client.SendRawMessage("PRIVMSG {0} :If you have any command suggestions, feel free to ping my owner, Blank!", sender.Nick);
             }
-            if (command.StartsWith("dice") || command.StartsWith("d"))
+            if (command.StartsWith("roll"))
             {
-                string[] splitcommand = command.Split(new char[] { ' ' }, 2);
+                string[] splitcommand = command.Split(new char[] { ' ', 'd' }, 3);
                 if (splitcommand.Length > 1){
-                    if (splitcommand[1] == "blunt")
+                    string secondnumber;
+                    int secondDice = 0;
+
+                    if (splitcommand[1].Contains("blunt"))
                     {
                         client.SendRawMessage("PRIVMSG {0} :Hey {1}, pass the weed!", client.Channels[0].Name, sender.Nick);
                         return;
+                    }
+                    if (command.Contains("d"))
+                    {
+                        try{
+                        secondnumber = splitcommand[2].ToLower();
+                        secondDice = Convert.ToInt32(secondnumber);
+                        }
+                        catch
+                        {
+                            client.SendRawMessage("PRIVMSG {0} :{1}, make sure you type in a # or #d#!", client.Channels[0].Name, sender.Nick);
+                            return;
+                        }
                     }
                     try
                     {
@@ -272,7 +338,7 @@ namespace RetaBot
                         float diceroll = Convert.ToSingle(number);
                         if (diceroll > 999)
                         {
-                            client.SendRawMessage("PRIVMSG {0} :I don't have that many die!", client.Channels[0].Name);
+                            client.SendRawMessage("PRIVMSG {0} :I don't have that many dice!", client.Channels[0].Name);
                         }
                         else if (diceroll <= 0)
                         {
@@ -280,11 +346,31 @@ namespace RetaBot
                         }
                         else
                         {
-                            float nextValue = random.Next(1, 7); // Returns a random number from 0-99
-                            float finaloutcome = (1 + nextValue) * diceroll;
-                            string finaloutcometxt = Convert.ToString(finaloutcome);
+                            if (secondDice > 0)
+                            {
+                                float nextValue = random.Next(1, secondDice); // Returns a random number from 0-99
+                                float finaloutcome = (1 + nextValue) * diceroll;
+                                string finaloutcometxt = Convert.ToString(finaloutcome);
 
-                            client.SendRawMessage("PRIVMSG {0} :You rolled a {1}", client.Channels[0].Name, finaloutcometxt);
+                                client.SendRawMessage("PRIVMSG {0} :You rolled a {1}", client.Channels[0].Name, finaloutcometxt);
+                            }
+                            else if (secondDice <= 0)
+                            {
+                                float nextValue = random.Next(1, 7); // Returns a random number from 0-99
+                                float finaloutcome = (1 + nextValue) * diceroll;
+                                string finaloutcometxt = Convert.ToString(finaloutcome);
+
+                                client.SendRawMessage("PRIVMSG {0} :You rolled a {1}", client.Channels[0].Name, finaloutcometxt);
+                            }
+                            else
+                            {
+                                float nextValue = random.Next(1, 7); // Returns a random number from 0-99
+                                float finaloutcome = (1 + nextValue) * diceroll;
+                                string finaloutcometxt = Convert.ToString(finaloutcome);
+
+                                client.SendRawMessage("PRIVMSG {0} :You rolled a {1}", client.Channels[0].Name, finaloutcometxt);
+                            }
+                            
                         }
                     }
                     catch
@@ -344,9 +430,9 @@ namespace RetaBot
                             }
                             catch (Exception ex)
                             {
-                                client.SendRawMessage("PRIVMSG {0} :ERROR : Something went wrong! Blank HELP!", client.Channels[0].Name);
+                                client.SendRawMessage("PRIVMSG {0} :The prefix must be a single character!", client.Channels[0].Name);
                                 Console.ForegroundColor = ConsoleColor.Red;
-                                Console.WriteLine("ERROR : PREFIX CHANGE FAILED!\n");
+                                Console.WriteLine("ERROR : "+ ex +"\n");
                                 Console.ForegroundColor = ConsoleColor.Gray;
                             }
                         }
@@ -363,37 +449,83 @@ namespace RetaBot
                 string[] splitcommand = command.Split(new char[] { ' ' }, 2);
                 if (splitcommand.Length >= 1)
                 {
-                    try
-                    {
-                        ttlquestions = Convert.ToInt32(splitcommand[1]);
-                        Trivia.StartTrivia();
-
-                        client.SendRawMessage("PRIVMSG {0} :TRIVIA HAS BEEN TOGGLED BY {1}!", client.Channels[0].Name, sender);
-                        client.SendRawMessage("PRIVMSG {0} :Question {2} : {1}!", client.Channels[0].Name, Trivia.thisquestion, Trivia.currentquestion);
-
-                        if (command.StartsWith("A"))
+                        if (splitcommand[1].Contains("end"))
                         {
-                            string[] splitcommand2 = command.Split(new char[] { ' ' });
-                            if (splitcommand2[1].Equals(Trivia.thisanswer, StringComparison.InvariantCultureIgnoreCase))
+                            if (triviaToggle == true)
                             {
-                                client.SendRawMessage("PRIVMSG {0} :{1} Got the answer correct! ({2})", client.Channels[0].Name, sender, Trivia.thisanswer);
-                                Trivia.StartTrivia();
-                                return;
+                                client.SendRawMessage("PRIVMSG {0} :{1} TOGGLED TRIVIA OFF!", client.Channels[0].Name, sender.Nick);
+                                triviaToggle = false;
+                            }
+                            else
+                            {
+                                client.SendRawMessage("PRIVMSG {0} :{1} Trivia isn't toggled.", client.Channels[0].Name, sender.Nick);
                             }
                         }
-                    }
-                    catch
-                    {
+                        else if (triviaToggle == false && !splitcommand[1].Contains("end"))
+                        {
+                            client.SendRawMessage("PRIVMSG {0} :{1}, Trivia isn't toggled.", client.Channels[0].Name, sender.Nick);
+                        }
+                        else if (triviaToggle == false)
+                        {
+                            
+                            try
+                            {
+                                ttlquestions = Convert.ToInt32(splitcommand[1]);
+                                Trivia.StartTrivia();
+                                triviatimer = 2000;
+                                triviaToggle = true;
 
-                    }
+                                client.SendRawMessage("PRIVMSG {0} :TRIVIA HAS BEEN TOGGLED BY {1}!", client.Channels[0].Name, sender.Nick);
+                                client.SendRawMessage("PRIVMSG {0} :Question {2} : {1}!", client.Channels[0].Name, Trivia.thisquestion+1, Trivia.currentquestion);
+
+                            }
+                            catch
+                            {
+                                //Nothing
+                            }
+                        }
 
                 }
             }
+
+            if (triviaToggle == true && triviatimer > 0)
+            {
+                if (command.StartsWith("A"))
+                {
+                    string[] splitcommand2 = command.Split(new char[] { ' ' });
+                    if (splitcommand2[1].Equals(Trivia.thisanswer, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        client.SendRawMessage("PRIVMSG {0} :{1} Got the answer correct! ({2})", client.Channels[0].Name, sender.Nick, Trivia.thisanswer);
+                        Trivia.StartTrivia();
+                        triviatimer = 0;
+                        triviaToggle = false;
+                        client.SendRawMessage("PRIVMSG {0} :THAT'S THE END OF THE LIST FOLKS! TRIVIA IS OVER!", client.Channels[0].Name);
+                        return;
+                    }
+                }
+            }
+            else if (triviatimer <= 0 && triviaToggle == true)
+            {
+                triviatimer = 0;
+                client.SendRawMessage("PRIVMSG {0} :TIME IS UP! THE CORRECT ANSWER IS ({1})", client.Channels[0].Name, Trivia.thisanswer);
+                triviaToggle = false;
+            }
+
+            if (command.StartsWith("reverse"))
+            {
+                string[] splitcommand = command.Split(new char[] { ' ' }, 2);
+                char[] charArray = splitcommand[1].ToCharArray();
+                Array.Reverse(charArray);
+                String reverse = new String(charArray);
+                string returntext = reverse;
+                client.SendRawMessage("PRIVMSG {0} :{1}", client.Channels[0].Name, returntext);
+
+            }
+
+
             
 
-
         }
-
 
 
 
