@@ -1,4 +1,5 @@
 using ChatSharp;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,8 @@ using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace RetaBot
@@ -22,7 +25,9 @@ namespace RetaBot
         public static int ttlquestions;
         private static List<string> floodlist = new List<string>();
         public static bool triviaToggle;
-        public static int triviatimer;
+        public static int triviaTimer;
+        public static System.Timers.Timer timer = new System.Timers.Timer();
+        public static int currentQuestion;
 
         private static string[] feeling = new string[] {
 			"I am doing well",
@@ -230,9 +235,11 @@ namespace RetaBot
 
             };
 
+
             while (true)
                 ; //just keeps everything going
         }
+
 
 
 
@@ -248,7 +255,7 @@ namespace RetaBot
         {
             ProgramSettings.WriteSettings();
             client.Quit("Restarting...");
-            Application.Restart();
+            System.Windows.Forms.Application.Restart();
             Environment.Exit(0);
         }
 
@@ -281,6 +288,48 @@ namespace RetaBot
                 }
             }
         }
+
+        public static void triviaQuestion()
+        {
+
+            Trivia.StartTrivia();
+            timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            timer.Interval = 1000;
+            triviaTimer = 60;
+            timer.Enabled = true;
+            triviaToggle = true;
+            int questionNum = Trivia.currentquestion + 1;
+
+            
+            client.SendRawMessage("PRIVMSG {0} :Question {2} : {1}", client.Channels[0].Name, Trivia.thisquestion, questionNum);
+        }
+
+
+        public static void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            triviaTimer--;
+
+            if (triviaTimer <= 0 && triviaToggle == true)
+            {
+                triviaTimer = 0;
+                client.SendRawMessage("PRIVMSG {0} :TIME IS UP! THE CORRECT ANSWER IS ({1})", client.Channels[0].Name, Trivia.thisanswer);
+                if (currentQuestion < ttlquestions)
+                {
+                    timer.Enabled = false;
+                    currentQuestion += 1;
+                    triviaQuestion();
+                }
+                else
+                {
+                    triviaTimer = 0;
+                    timer.Enabled = false;
+                    triviaToggle = false;
+                    client.SendRawMessage("PRIVMSG {0} :THAT'S THE END OF THE LIST FOLKS! TRIVIA IS OVER!", client.Channels[0].Name);
+                    return;
+                }
+            }
+        }
+
 
         private static void ircCommands(string command, IrcUser sender, IrcClient reciever)
         {
@@ -447,36 +496,45 @@ namespace RetaBot
             if (command.StartsWith("trivia"))
             {
                 string[] splitcommand = command.Split(new char[] { ' ' }, 2);
-                if (splitcommand.Length >= 1)
-                {
-                        if (splitcommand[1].Contains("end"))
+                currentQuestion = 1;
+                    if (splitcommand.Length >= 1)
+                    {
+
+                        if (triviaToggle == true)
                         {
-                            if (triviaToggle == true)
+                            if (splitcommand.Length > 1)
                             {
-                                client.SendRawMessage("PRIVMSG {0} :{1} TOGGLED TRIVIA OFF!", client.Channels[0].Name, sender.Nick);
-                                triviaToggle = false;
+                                if (splitcommand[1].Contains("end"))
+                                {
+                                    client.SendRawMessage("PRIVMSG {0} :{1} TOGGLED TRIVIA OFF!", client.Channels[0].Name, sender.Nick);
+                                    triviaToggle = false;
+                                    timer.Enabled = false;
+                                    return;
+                                }
+                                else if (triviaToggle == false && !splitcommand[1].Contains("end"))
+                                {
+                                    client.SendRawMessage("PRIVMSG {0} :{1}, Trivia isn't toggled.", client.Channels[0].Name, sender.Nick);
+                                    return;
+                                }
                             }
-                            else
-                            {
-                                client.SendRawMessage("PRIVMSG {0} :{1} Trivia isn't toggled.", client.Channels[0].Name, sender.Nick);
-                            }
+
                         }
-                        else if (triviaToggle == false && !splitcommand[1].Contains("end"))
+
+
+                        if (triviaToggle == false)
                         {
-                            client.SendRawMessage("PRIVMSG {0} :{1}, Trivia isn't toggled.", client.Channels[0].Name, sender.Nick);
-                        }
-                        else if (triviaToggle == false)
-                        {
-                            
+
                             try
                             {
-                                ttlquestions = Convert.ToInt32(splitcommand[1]);
-                                Trivia.StartTrivia();
-                                triviatimer = 2000;
-                                triviaToggle = true;
 
-                                client.SendRawMessage("PRIVMSG {0} :TRIVIA HAS BEEN TOGGLED BY {1}!", client.Channels[0].Name, sender.Nick);
-                                client.SendRawMessage("PRIVMSG {0} :Question {2} : {1}!", client.Channels[0].Name, Trivia.thisquestion+1, Trivia.currentquestion);
+                                bool result = Int32.TryParse(splitcommand[1], out ttlquestions);
+                                if (result)
+                                {
+                                    Console.WriteLine("\nConverted '{0}' to {1}.", splitcommand[1], ttlquestions);
+                                    client.SendRawMessage("PRIVMSG {0} :TRIVIA HAS BEEN TOGGLED! If you know the answer, respond with '-A answer'!", client.Channels[0].Name);
+                                }
+
+                                triviaQuestion();
 
                             }
                             catch
@@ -484,32 +542,46 @@ namespace RetaBot
                                 //Nothing
                             }
                         }
-
+                   
                 }
-            }
 
-            if (triviaToggle == true && triviatimer > 0)
+
+
+
+            }
+            if (triviaToggle == true && triviaTimer > 0)
             {
                 if (command.StartsWith("A"))
                 {
                     string[] splitcommand2 = command.Split(new char[] { ' ' });
-                    if (splitcommand2[1].Equals(Trivia.thisanswer, StringComparison.InvariantCultureIgnoreCase))
+                    if (splitcommand2[1].Contains(Trivia.thisanswer, StringComparison.InvariantCultureIgnoreCase))
                     {
                         client.SendRawMessage("PRIVMSG {0} :{1} Got the answer correct! ({2})", client.Channels[0].Name, sender.Nick, Trivia.thisanswer);
-                        Trivia.StartTrivia();
-                        triviatimer = 0;
-                        triviaToggle = false;
-                        client.SendRawMessage("PRIVMSG {0} :THAT'S THE END OF THE LIST FOLKS! TRIVIA IS OVER!", client.Channels[0].Name);
-                        return;
+                        timer.Enabled = false;
+                        if (currentQuestion < ttlquestions)
+                        {
+                            currentQuestion += 1;
+
+                            triviaQuestion();
+                        }
+                        else
+                        {
+                            timer.Interval = 1;
+                            triviaToggle = false;
+                            client.SendRawMessage("PRIVMSG {0} :THAT'S THE END OF THE LIST FOLKS! TRIVIA IS OVER!", client.Channels[0].Name);
+                            return;
+                        }
                     }
                 }
             }
-            else if (triviatimer <= 0 && triviaToggle == true)
+            else if (triviaTimer <= 0 && triviaToggle == true)
             {
-                triviatimer = 0;
+                triviaTimer = 0;
                 client.SendRawMessage("PRIVMSG {0} :TIME IS UP! THE CORRECT ANSWER IS ({1})", client.Channels[0].Name, Trivia.thisanswer);
                 triviaToggle = false;
             }
+
+            
 
             if (command.StartsWith("reverse"))
             {
