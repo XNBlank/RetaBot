@@ -294,20 +294,28 @@ namespace RetaBot
 
             Trivia.StartTrivia();
             timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            timer.Interval = 1000;
-            triviaTimer = 60;
+            timer.Interval = 1001;
+            triviaTimer = 240;
             timer.Enabled = true;
             triviaToggle = true;
             int questionNum = Trivia.currentquestion + 1;
 
-            
-            client.SendRawMessage("PRIVMSG {0} :Question {2} : {1}", client.Channels[0].Name, Trivia.thisquestion, questionNum);
+
+            client.SendRawMessage("PRIVMSG {0} :Question {2} : {1}", client.Channels[0].Name, Trivia.thisquestion, currentQuestion);
         }
 
 
         public static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            triviaTimer--;
+            if (triviaTimer <= 0)
+            {
+                triviaTimer = 240;
+            }
+            else
+            {
+                triviaTimer--;
+            }
+
 
             if (triviaTimer <= 0 && triviaToggle == true)
             {
@@ -553,8 +561,10 @@ namespace RetaBot
             {
                 if (command.StartsWith("A"))
                 {
-                    string[] splitcommand2 = command.Split(new char[] { ' ' });
-                    if (splitcommand2[1].Contains(Trivia.thisanswer, StringComparison.InvariantCultureIgnoreCase))
+                    string[] splitcommand2 = command.Split(new char[] { ' ' }, 2);
+                    string input = splitcommand2[1];
+
+                    if (input.Equals(Trivia.thisanswer, StringComparison.CurrentCultureIgnoreCase))
                     {
                         client.SendRawMessage("PRIVMSG {0} :{1} Got the answer correct! ({2})", client.Channels[0].Name, sender.Nick, Trivia.thisanswer);
                         timer.Enabled = false;
