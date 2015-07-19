@@ -217,6 +217,7 @@ namespace RetaBot
                             try
                             {
                                 string checkURL = Regex.Match(testurl, @"[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", RegexOptions.IgnoreCase).Groups["URL"].Value;
+
                                 WebClient x = new WebClient();
                                 client.SendRawMessage("NOTICE {0} :{0} Hold on, grabbing link title...", e.PrivateMessage.User.Nick);
                                 string url = e.PrivateMessage.Message.Substring(e.PrivateMessage.Message.LastIndexOf(checkURL));
