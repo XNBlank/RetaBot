@@ -207,7 +207,7 @@ namespace RetaBot
                 {
                     string testurl = e.PrivateMessage.Message;
                     Uri uriResult;
-                    bool result = Uri.TryCreate(testurl, UriKind.Absolute, out uriResult)
+                    bool result = Uri.TryCreate(testurl, UriKind.RelativeOrAbsolute, out uriResult)
                                   && (uriResult.Scheme == Uri.UriSchemeHttp
                                       || uriResult.Scheme == Uri.UriSchemeHttps);
                     
@@ -220,9 +220,9 @@ namespace RetaBot
 
                                 WebClient x = new WebClient();
                                 client.SendRawMessage("NOTICE {0} :{0} Hold on, grabbing link title...", e.PrivateMessage.User.Nick);
-                                string url = e.PrivateMessage.Message.Substring(e.PrivateMessage.Message.LastIndexOf(checkURL));
+                                string url = testurl.Substring(e.PrivateMessage.Message.LastIndexOf(checkURL));
                                 string[] cleaned = url.Split(new char[] { ' ' }, 2);
-                                if (e.PrivateMessage.Message.Contains(".xxx") || e.PrivateMessage.Message.Contains("porn"))
+                                if (testurl.Contains(".xxx") || testurl.Contains("porn"))
                                 {
                                     client.SendRawMessage("PRIVMSG {0} :Thanks for posting porn here, {1}", client.Channels[0].Name, e.PrivateMessage.User.Nick);
                                     return;
