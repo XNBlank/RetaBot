@@ -9,6 +9,7 @@ RetaBot is still a work in progress. Any and all suggestions are welcome!
 * dice/d - Roll a 6-sided die x number of times. (!dice x)
 * help - Displays a help dialogue
 * commands - sends user a command list
+* trivia - Start/Stop a trivia game with x amount of questions (!trivia x / !trivia end).
 
 Retabot will also automatically parse any links posted in a chatroom. If you wish to not have your link parsed, type in 'dnp' anywhere within the same message. (Make sure there is a space between the link and 'dnp'.)
 
