@@ -205,24 +205,18 @@ namespace RetaBot
                 }
                 else
                 {
-                    string testurl = e.PrivateMessage.Message;
-                    Uri uriResult;
-                    bool result = Uri.TryCreate(testurl, UriKind.RelativeOrAbsolute, out uriResult)
-                                  && (uriResult.Scheme == Uri.UriSchemeHttp
-                                      || uriResult.Scheme == Uri.UriSchemeHttps);
-                    
-                    if (result == true && !e.PrivateMessage.Message.Contains("dnp"))
+
+                    if (e.PrivateMessage.Message.Contains("http://") || e.PrivateMessage.Message.Contains("https://") || e.PrivateMessage.Message.Contains("www.") || e.PrivateMessage.Message.Contains(".com") || e.PrivateMessage.Message.Contains(".net") || e.PrivateMessage.Message.Contains(".org") || e.PrivateMessage.Message.Contains(".ca") || e.PrivateMessage.Message.Contains(".us") || e.PrivateMessage.Message.Contains(".io") || e.PrivateMessage.Message.Contains(".mx") && !e.PrivateMessage.Message.Contains("dnp"))
                     {
                         
                             try
                             {
-                                string checkURL = Regex.Match(testurl, @"[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)", RegexOptions.IgnoreCase).Groups["URL"].Value;
-
+                                string privatemessage = e.PrivateMessage.Message;
                                 WebClient x = new WebClient();
                                 client.SendRawMessage("NOTICE {0} :{0} Hold on, grabbing link title...", e.PrivateMessage.User.Nick);
-                                string url = testurl.Substring(e.PrivateMessage.Message.LastIndexOf(checkURL));
+                                string url = e.PrivateMessage.Message.Substring(e.PrivateMessage.Message.LastIndexOf("http://"));
                                 string[] cleaned = url.Split(new char[] { ' ' }, 2);
-                                if (testurl.Contains(".xxx") || testurl.Contains("porn"))
+                                if (e.PrivateMessage.Message.Contains(".xxx") || e.PrivateMessage.Message.Contains("porn"))
                                 {
                                     client.SendRawMessage("PRIVMSG {0} :Thanks for posting porn here, {1}", client.Channels[0].Name, e.PrivateMessage.User.Nick);
                                     return;
@@ -246,6 +240,8 @@ namespace RetaBot
             while (true)
                 ; //just keeps everything going
         }
+
+
 
 
         private static void Shutdown()
